@@ -29,6 +29,7 @@ namespace FolderOrganizer
         public AdvancedSettingsPage()
         {
             this.InitializeComponent();
+            this.NavigationCacheMode = NavigationCacheMode.Enabled;
             
             PopulateCategoryListView();
             PopulateFileTypeListView();

@@ -22,7 +22,7 @@
 
                 <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock
-                    Text="Settings"
+                    Text="Quick Settings"
                     FontSize="36"
                     FontWeight="Bold"
                     TextDecorations="Underline"

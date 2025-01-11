@@ -39,7 +39,8 @@
             Grid.Row="0"
             Grid.Column="0"
             HorizontalAlignment="Left"
-            VerticalAlignment="Top">
+            VerticalAlignment="Top"
+            Margin="24,24,0,0">
             <Button 
                 Click="BackButton_OnClick" 
                 Width="60">
@@ -52,17 +53,19 @@
             Grid.Column="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
-            x:Name="categoriesStackPanel">
+            x:Name="categoriesStackPanel"
+            Margin="0,24,0,0">
 
             <TextBlock
                 Text="File Organization Categories"
                 FontSize="24"
                 FontWeight="Bold"
-                Margin="0,12,0,12"/>
+                Margin="0,0,0,12"/>
             <ToggleSwitch
                 x:Name="selectAllCategoriesToggleSwitch"
                 OnContent="Select All"
                 OffContent="Select All"
+                FontWeight="Bold"
                 Toggled="SelectAllCategories_OnToggle"/>
             <ListView
                 x:Name="categoriesListView"
@@ -78,6 +81,7 @@
                             <ToggleSwitch
                                 OffContent="{Binding Category}"
                                 OnContent="{Binding Category}"
+                                FontWeight="Bold"
                                 Tag="{Binding Category}"
                                 Loaded="CategoryToggleSwitch_OnLoaded"
                                 Toggled="CategoryToggleSwitch_OnToggle"/>
@@ -92,12 +96,13 @@
             Grid.Row="1"
             Grid.Column="1"
             HorizontalAlignment="Center"
-            VerticalAlignment="Top">
+            VerticalAlignment="Top"
+            Margin="0,24,0,0">
             <TextBlock
                 Text="File Type Associations"
                 FontSize="24"
                 FontWeight="Bold"
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Left"
                 Margin="0,0,0,12"/>
             <TextBlock
                 Text="To customize the file types associated with a category:"
@@ -159,11 +164,62 @@
             Grid.Row="1"
             Grid.Column="2"
             HorizontalAlignment="Center"
-            VerticalAlignment="Top">
-            <TextBlock
+            VerticalAlignment="Top"
+            Width="300"
+            Margin="0,24,0,0">
+            <StackPanel
+                Margin="0,0,0,24">
+                <TextBlock
                 Text="Add File Category"
                 FontSize="24"
-                FontWeight="Bold"/>
+                FontWeight="Bold"
+                Margin="0,0,0,12"/>
+                <StackPanel 
+                Orientation="Vertical"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                Padding="12"
+                Margin="0,0,0,12">
+                    <TextBox
+                    PlaceholderText="Category Name"
+                    TextWrapping="Wrap"
+                    FontSize="18"
+                    FontWeight="Bold"
+                    Margin="0,0,0,12"/>
+                    <TextBlock
+                    Text="Associated File Types:"
+                    FontWeight="Bold"
+                    Margin="0,0,0,8"/>
+                    <TextBox
+                    PlaceholderText="File types..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="False"
+                    IsSpellCheckEnabled="False"/>
+                </StackPanel>
+                <Button
+                Content="Add"
+                Background="SteelBlue"
+                HorizontalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock
+                    Text="Sub-Folder Options"
+                    FontSize="24"
+                    FontWeight="Bold"
+                    Margin="0,0,0,12"/>
+                <ToggleSwitch
+                    OnContent="Move all sub-folders to new folder"
+                    OffContent="Move all sub-folders to new folder"
+                    FontWeight="Bold"/>
+                <ToggleSwitch
+                    OnContent="Organize files within sub-folders"
+                    OffContent="Organize files within sub-folders"
+                    FontWeight="Bold"/>
+                <ToggleSwitch
+                    OnContent="Delete sub-folders after organization"
+                    OffContent="Delete sub-folders after organization"
+                    FontWeight="Bold"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
     

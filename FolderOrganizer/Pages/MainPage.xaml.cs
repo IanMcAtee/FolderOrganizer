@@ -145,7 +145,15 @@ namespace FolderOrganizer
         private void AdvancedSettings_OnClick(object sender, RoutedEventArgs e)
         {
             
-            Frame.Navigate(typeof(AdvancedSettingsPage));
+            if (Frame.CanGoForward)
+            {
+                Frame.GoForward();
+            }
+            else
+            {
+                Frame.Navigate(typeof(AdvancedSettingsPage));
+            }
+
         }
     }
 
