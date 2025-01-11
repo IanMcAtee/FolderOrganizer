@@ -22,9 +22,11 @@ namespace FolderOrganizer
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class FileTypeSettingsPage : Page
+    public sealed partial class AdvancedSettingsPage : Page
     {
-        public FileTypeSettingsPage()
+        
+
+        public AdvancedSettingsPage()
         {
             this.InitializeComponent();
             
@@ -68,6 +70,11 @@ namespace FolderOrganizer
             listView.ItemsSource = fileTypeList;
         }
 
+        private void BackButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Frame.GoBack();
+        }
+
         private void CategoryToggleSwitch_OnLoaded(object sender, RoutedEventArgs e)
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender; 
@@ -99,6 +106,12 @@ namespace FolderOrganizer
             else
             {
                 SettingsManager.Instance.RemoveFileCategory((string)toggleSwitch.Tag);
+                
+                // Check if the select all toggle is on, if so, toggle it off
+                if (selectAllCategoriesToggleSwitch.IsOn)
+                {
+                    selectAllCategoriesToggleSwitch.IsOn = false;
+                }
             }
 
             // DEBUG
@@ -110,9 +123,28 @@ namespace FolderOrganizer
             }
         }
 
+        /// <summary>
+        /// Toggle event for the select all categories toggle switch.
+        /// Toggles all categories and adds/removes associated categories in settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SelectAllCategories_OnToggle(object sender, RoutedEventArgs e)
         {
-            List<ToggleSwitch> toggles = XamlHelper.GetAllChildrenInPanelOfType<ToggleSwitch>(categoriesStackPanel);
+            ToggleSwitch selectAllToggleSwitch = (ToggleSwitch)sender;
+
+            // Get all the children toggle switches in the categories list view
+            List<ToggleSwitch> categoryToggleSwitches = XamlHelper.GetAllChildrenInObject<ToggleSwitch>(categoriesListView);
+            
+            // Iterate through category toggles and match the toggle state to select all toggle
+            if (selectAllToggleSwitch.IsOn)
+            {
+                foreach (ToggleSwitch categoryToggle in categoryToggleSwitches)
+                {
+                    categoryToggle.IsOn = selectAllToggleSwitch.IsOn;
+                }
+            }
+            
         }
 
         private void AllowFileTypeEditing_OnToggle(object sender, RoutedEventArgs e)

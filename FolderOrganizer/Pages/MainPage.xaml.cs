@@ -110,7 +110,7 @@ namespace FolderOrganizer
             string? category = categoryCheckBox.Tag.ToString();
             if (category != null)
             {
-                SettingsManager.Instance.SetFileCategory(category);
+                //SettingsManager.Instance.SetFileCategory(category);
             }
             foreach (string cat in SettingsManager.Instance.Settings.CategoryToFileTypeMap.Keys)
             {
@@ -140,10 +140,12 @@ namespace FolderOrganizer
             Debug.WriteLine(SettingsManager.Instance.Settings.UnpackSubfolders);
         }
 
-        private void SetFileTypes_OnClick(object sender, RoutedEventArgs e)
+        
+
+        private void AdvancedSettings_OnClick(object sender, RoutedEventArgs e)
         {
-            FileTypeSettingsWindow fileTypeSettingsWindow = new FileTypeSettingsWindow();
-            fileTypeSettingsWindow.Activate();
+            
+            Frame.Navigate(typeof(AdvancedSettingsPage));
         }
     }
 

@@ -46,32 +46,6 @@ namespace FolderOrganizer
             Settings.UnpackSubfolders = set;
         }
 
-        internal void SetFileCategory(string categoryToAdd)
-        { 
-            // BUG: Check if key already exists prior to adding
-            foreach (KeyValuePair<string, List<string>> mapping in CategoryToFileTypeMappings.Map)
-            {
-                if (mapping.Key == categoryToAdd)
-                {
-                    Settings.CategoryToFileTypeMap.Add(mapping.Key, mapping.Value);
-                }
-            }
-        }
-
-        //internal void RemoveFileCategory(string categoryToRemove)
-        //{
-        //    if (Settings.CategoryToFileTypeMap.Count == 0)
-        //    {
-        //        return;
-        //    }
-        //    foreach (string category in Settings.CategoryToFileTypeMap.Keys)
-        //    {
-        //        if (category == categoryToRemove)
-        //        {
-        //            Settings.CategoryToFileTypeMap.Remove(category);
-        //        }
-        //    }
-        //}
 
         internal void AddFileType(string category, string extension)
         {

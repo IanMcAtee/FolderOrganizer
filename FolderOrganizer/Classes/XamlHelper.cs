@@ -1,9 +1,7 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using System;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FolderOrganizer
 {
@@ -27,23 +25,26 @@ namespace FolderOrganizer
             catch { return default;}
         }
 
-        public static List<T> GetAllChildrenInPanelOfType<T>(Panel rootPanel)
+
+        public static List<T> GetAllChildrenInObject<T>(DependencyObject root)
         {
             List<T> childrenOfType = new List<T>();
 
-            foreach (object child in rootPanel.Children)
+            int childCount = VisualTreeHelper.GetChildrenCount(root);
+
+            for (int i = 0; i < childCount; i++)
             {
-                if (child.GetType() == typeof(Panel))
+                var child = VisualTreeHelper.GetChild(root, i);
+
+                if (child is T typedChild)
                 {
-                    childrenOfType = childrenOfType.Concat(GetAllChildrenInPanelOfType<T>((Panel)child)).ToList();
+                    childrenOfType.Add(typedChild);
                 }
-                else if (child.GetType() == typeof(T))
-                {
-                    childrenOfType.Add((T)child);   
-                }
+
+                childrenOfType.AddRange(GetAllChildrenInObject<T>(child));
             }
 
             return childrenOfType;
-        } 
+        }
     }
 }
