@@ -27,39 +27,94 @@ namespace FolderOrganizer
         public FileTypeSettingsPage()
         {
             this.InitializeComponent();
-
+            
+            PopulateCategoryListView();
             PopulateFileTypeListView();
+        }
+
+        
+        private void PopulateCategoryListView()
+        {
+            categoriesListView.ItemsSource = CategoryToFileTypeMappings.CategoryAndFileTypesList;
         }
 
         private void PopulateFileTypeListView()
         {
             ListView listView = fileTypeListView;
-            List<FileTypeListItem> fileTypeList = new List<FileTypeListItem>();
-            
-            FileTypeListItem? fileTypeListItem = null;
+            List<CategoryAndFileTypesItem> fileTypeList = new List<CategoryAndFileTypesItem>();
+
+            CategoryAndFileTypesItem? fileTypeListItem = null;
             string fileTypesFormatted = "";
 
-            foreach (KeyValuePair<string,List<string>> categoryFileTypeMap in CategoryToFileTypeMappings.Map)
-            {   
+            foreach (KeyValuePair<string, List<string>> categoryFileTypeMap in CategoryToFileTypeMappings.Map)
+            {
                 // Populate the first file type without the "," separator
                 fileTypesFormatted += categoryFileTypeMap.Value[0];
 
                 // Iterate through remaining file types separating each with ","
-                for (int i = 1; i < categoryFileTypeMap.Value.Count; i++) 
+                for (int i = 1; i < categoryFileTypeMap.Value.Count; i++)
                 {
                     fileTypesFormatted += ", " + categoryFileTypeMap.Value[i];
                 }
-                
+
                 // Add a FileTypeList item with matching category and file types to the list
-                fileTypeListItem = new FileTypeListItem(categoryFileTypeMap.Key, fileTypesFormatted);
+                fileTypeListItem = new CategoryAndFileTypesItem(categoryFileTypeMap.Key, fileTypesFormatted);
                 fileTypeList.Add(fileTypeListItem);
 
                 // Reset the file types string
                 fileTypesFormatted = "";
             }
 
-            listView.ItemsSource = fileTypeList;    
+            listView.ItemsSource = fileTypeList;
         }
+
+        private void CategoryToggleSwitch_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch toggleSwitch = (ToggleSwitch)sender; 
+
+            foreach (CategoryAndFileTypes categoryAndFileTypes in SettingsManager.Instance.Settings.SelectedCategoryFileTypesList)
+            {
+                if ((string)toggleSwitch.Tag == categoryAndFileTypes.Category)
+                {
+                    toggleSwitch.IsOn = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Toggle event for category toggle switch. 
+        /// Adds or removes associated category in settings based on toggle state
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CategoryToggleSwitch_OnToggle(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
+
+            // Add or remove category in settings based on toggle state
+            if (toggleSwitch.IsOn)
+            {
+                SettingsManager.Instance.AddCommonFileCategory((string)toggleSwitch.Tag);
+            }
+            else
+            {
+                SettingsManager.Instance.RemoveFileCategory((string)toggleSwitch.Tag);
+            }
+
+            // DEBUG
+            Debug.WriteLine("CATEGORY TOGGLE TOGGLED");
+            Debug.WriteLine("Categories in Settings:");
+            foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCategoryFileTypesList)
+            {
+                Debug.WriteLine(c.Category);
+            }
+        }
+
+        private void SelectAllCategories_OnToggle(object sender, RoutedEventArgs e)
+        {
+            List<ToggleSwitch> toggles = XamlHelper.GetAllChildrenInPanelOfType<ToggleSwitch>(categoriesStackPanel);
+        }
+
         private void AllowFileTypeEditing_OnToggle(object sender, RoutedEventArgs e)
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
@@ -86,22 +141,38 @@ namespace FolderOrganizer
             textBox.IsEnabled = toggleSwitch.IsOn;
         }
 
-        private void OnFileTypesTextChanged(object sender, TextChangedEventArgs e)
+      
+
+        private void ApplyCustomFileTypes_OnClick(object sender, RoutedEventArgs e)
         {
-            TextBox textBox = (TextBox)sender;
+            Button button = (Button)sender;
+            TextBox? textBox = XamlHelper.GetFirstSiblingInPanelOfType<TextBox>(button);
+
+            if (textBox == null)
+            {
+                return;
+            }
+
             string category = (string)textBox.Tag;
             List<string> customFileTypes = new List<string>();
-            string customFileType = "";
+            string? customFileType = null;
+            bool inValidSequence = false;
+            
             for (int i = 0; i < textBox.Text.Length; i++)
             {
                 if (textBox.Text[i] == '.')
                 {
+                    inValidSequence = true;
                     customFileType += textBox.Text[i];
                 }
                 else if (textBox.Text[i] == ',')
                 {
-                    customFileTypes.Add(customFileType);
-                    customFileType = "";
+                    if (customFileType != null)
+                    {
+                        customFileTypes.Add(customFileType);
+                    }
+                    inValidSequence = false;
+                    customFileType = null;
                 }
                 else if (textBox.Text[i] == ' ')
                 {
@@ -109,33 +180,43 @@ namespace FolderOrganizer
                 }
                 else
                 {
-                    customFileType += textBox.Text[i];
+                    if (inValidSequence)
+                    {
+                        customFileType += textBox.Text[i];
+                    }
                 }
 
                 // Handle end of string case where there is no "," separator
                 if (i == textBox.Text.Length - 1)
                 {
-                    customFileTypes.Add(customFileType);
+                    if (customFileType != null)
+                    {
+                        customFileTypes.Add(customFileType);
+                    }
+                    
                 }
             }
             SettingsManager.Instance.Settings.CategoryToFileTypeMap[category] = customFileTypes;
-            Debug.WriteLine($"Custom File Type Added In Catefory {SettingsManager.Instance.Settings.CategoryToFileTypeMap[category]}");
+
+            Debug.WriteLine($"Custom File Type Added In Catefory {SettingsManager.Instance.Settings.CategoryToFileTypeMap.ContainsKey(category)}");
+            Debug.WriteLine($"Number of Extensions: {SettingsManager.Instance.Settings.CategoryToFileTypeMap[category].Count}");
             foreach (string s in SettingsManager.Instance.Settings.CategoryToFileTypeMap[category])
             {
                 Debug.WriteLine(s);
             }
+
         }
     }
 
 
 }
 
-internal class FileTypeListItem
+internal class CategoryAndFileTypesItem
 {
     public string Category { get; private set; }
     public string AssociatedFileTypes { get; private set; }
 
-    public FileTypeListItem(string category, string associatedFileTypes)
+    public CategoryAndFileTypesItem(string category, string associatedFileTypes)
     {
         Category = category;
         AssociatedFileTypes = associatedFileTypes;

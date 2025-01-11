@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Media.AppBroadcasting;
+using Windows.UI.Input.Spatial;
 
 namespace FolderOrganizer
 {
@@ -57,20 +58,20 @@ namespace FolderOrganizer
             }
         }
 
-        internal void RemoveFileCategory(string categoryToRemove)
-        {
-            if (Settings.CategoryToFileTypeMap.Count == 0)
-            {
-                return;
-            }
-            foreach (string category in Settings.CategoryToFileTypeMap.Keys)
-            {
-                if (category == categoryToRemove)
-                {
-                    Settings.CategoryToFileTypeMap.Remove(category);
-                }
-            }
-        }
+        //internal void RemoveFileCategory(string categoryToRemove)
+        //{
+        //    if (Settings.CategoryToFileTypeMap.Count == 0)
+        //    {
+        //        return;
+        //    }
+        //    foreach (string category in Settings.CategoryToFileTypeMap.Keys)
+        //    {
+        //        if (category == categoryToRemove)
+        //        {
+        //            Settings.CategoryToFileTypeMap.Remove(category);
+        //        }
+        //    }
+        //}
 
         internal void AddFileType(string category, string extension)
         {
@@ -80,11 +81,73 @@ namespace FolderOrganizer
             }
         }
 
+        /// <summary>
+        /// Adds a category from the CategoryToFileTypeMappings to the settings if not present
+        /// </summary>
+        /// <param name="categoryName"></param>
+        internal void AddCommonFileCategory(string categoryName)
+        {
+            // Check if category already in settings
+            if (IsCategoryInSettings(categoryName))
+            {
+                return;
+            }
+
+            // Retrieve the category and file type from the common mappings
+            CategoryAndFileTypes? categoryAndFileTypes = CategoryToFileTypeMappings.GetCategoryAndFileTypes(categoryName);
+            
+            // Add category if found
+            if (categoryAndFileTypes != null)
+            {
+                Settings.SelectedCategoryFileTypesList.Add(categoryAndFileTypes);   
+            }
+        }
+
+        /// <summary>
+        /// Removes a category from the settings if present
+        /// </summary>
+        /// <param name="categoryName"></param>
+        internal void RemoveFileCategory(string categoryName)
+        {
+            if (!IsCategoryInSettings(categoryName))
+            {
+                return;
+            }
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
+            {
+                if (caft.Category == categoryName)
+                {
+                    Settings.SelectedCategoryFileTypesList.Remove(caft);
+                    break;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Determines if a category is already present in setting's category list
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
+        internal bool IsCategoryInSettings(string category)
+        {
+            foreach (CategoryAndFileTypes categoryAndFileTypes in Settings.SelectedCategoryFileTypesList)
+            {
+                if (categoryAndFileTypes.Category == category)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 
     internal class OrganizationSettings
     {
         public Dictionary<string, List<string>> CategoryToFileTypeMap { get; private set; } = new Dictionary<string, List<string>>();
+        public List<CategoryAndFileTypes> SelectedCategoryFileTypesList { get; private set; } = new List<CategoryAndFileTypes>();
         public bool UnpackSubfolders = false;
 
     }

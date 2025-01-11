@@ -8,8 +8,167 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="#242424">
-
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="5*"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row ="0" Grid.ColumnSpan="3" Background="Black"/>
+        <Border Grid.Row ="1" Grid.Column="0" Background="#121212"/>
+        <Border Grid.Row ="1" Grid.Column="1" Background="#242424"/>
+        <Border Grid.Row ="1" Grid.Column="2" Background="#484848"/>
+
+        <StackPanel 
+            Grid.Row="0" 
+            Grid.ColumnSpan="3"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <TextBlock
+                Text="Advanced Settings"
+                FontSize="36"
+                TextDecorations="Underline"
+                FontWeight="Bold"/>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top">
+            <Button
+                Content="Back"
+                Background="SteelBlue"
+                Margin="24,24,0,0"/>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            x:Name="categoriesStackPanel">
+            <TextBlock
+                Text="File Organization Categories"
+                FontSize="24"
+                FontWeight="Bold"
+                Margin="0,0,0,12"/>
+            <ToggleSwitch
+                OnContent="Select All"
+                OffContent="Select All"
+                Toggled="SelectAllCategories_OnToggle"/>
+            <Line
+                X1="0" X2="200"
+                StrokeThickness="2"
+                Stroke="White"/>
+            <ListView
+                x:Name="categoriesListView"
+                BorderThickness="1"
+                BorderBrush="Gray"
+                Width="350"
+                Height="600"
+                HorizontalAlignment="Left"
+                SelectionMode="None">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <ToggleSwitch
+                                OffContent="{Binding Category}"
+                                OnContent="{Binding Category}"
+                                Tag="{Binding Category}"
+                                Loaded="CategoryToggleSwitch_OnLoaded"
+                                Toggled="CategoryToggleSwitch_OnToggle"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+
+            </ListView>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top">
+            <TextBlock
+                Text="File Type Associations"
+                FontSize="24"
+                FontWeight="Bold"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,12"/>
+            <TextBlock
+                Text="To customize the file types associated with a category:"
+                Width="300"
+                HorizontalAlignment="Left"
+                TextWrapping="Wrap"
+                Margin="0,0,0,12"/>
+
+            <ListView
+                x:Name="fileTypeListView"
+                BorderThickness="1"
+                BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                Width="350"
+                Height="600"
+                HorizontalAlignment="Left"
+                SelectionMode="None">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" Margin="0,12,0,0">
+                            <TextBlock
+                                Text="{Binding Category}"
+                                FontSize="24"
+                                FontWeight="Bold"/>
+                            <ToggleSwitch
+                                OnContent="Use Custom File Types"
+                                OffContent="Use Custom File Types"
+                                Toggled="AllowFileTypeEditing_OnToggle"/>
+                            <TextBlock
+                                Text="Associated File Types:"
+                                FontSize="14"
+                                FontWeight="Bold"
+                                Margin="0,0,0,8"/>
+                            <TextBox
+                                Text="{Binding AssociatedFileTypes}"
+                                Tag="{Binding Category}"
+                                TextWrapping="Wrap"
+                                AcceptsReturn="False"
+                                IsSpellCheckEnabled="False"
+                                IsEnabled="False"
+                                Margin="0,0,0,8"/>
+                            <Button
+                                Content="Apply"
+                                HorizontalAlignment="Right"
+                                Background="SteelBlue"
+                                Click="ApplyCustomFileTypes_OnClick"
+                                Visibility="Visible"/>
+                            <Line 
+                                X1="0" X2="300"
+                                StrokeThickness="2"
+                                Stroke="White"
+                                Margin="0,12,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top">
+            <TextBlock
+                Text="Add File Category"
+                FontSize="24"
+                FontWeight="Bold"/>
+        </StackPanel>
+    </Grid>
+    
+    <!--<Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock
                 Text="File Type Associations"
@@ -55,21 +214,24 @@
                                 AcceptsReturn="False"
                                 IsSpellCheckEnabled="False"
                                 IsEnabled="False"
-                                TextChanged="OnFileTypesTextChanged"/>
+                                Margin="0,0,0,8"/>
+                            <Button
+                                Content="Apply"
+                                HorizontalAlignment="Right"
+                                Background="SteelBlue"
+                                Click="ApplyCustomFileTypes_OnClick"
+                                Visibility="Visible"/>
                             <Line 
                                 X1="0" X2="300"
                                 StrokeThickness="2"
                                 Stroke="White"
-                                Margin="0,20,0,0"/>
+                                Margin="0,12,0,0"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Button
-                Content="Apply"
-                Background="SteelBlue"
-                HorizontalAlignment="Right"/>
+            
 
         </StackPanel>
-    </Grid>
+    </Grid>-->
 </Page>
