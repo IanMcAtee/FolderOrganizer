@@ -14,63 +14,49 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace FolderOrganizer
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// Advanced Settings Page
     /// </summary>
     public sealed partial class AdvancedSettingsPage : Page
     {
-        
+        private List<ToggleSwitch> _categoryToggleSwitches = new List<ToggleSwitch>();
 
         public AdvancedSettingsPage()
         {
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Enabled;
-            
-            PopulateCategoryListView();
-            PopulateFileTypeListView();
+
+            // Populate the category and file types list views
+            PopulateListViews();
         }
 
-        
-        private void PopulateCategoryListView()
+        /// <summary>
+        /// Initializes the list views on first launch
+        /// </summary>
+        private void PopulateListViews()
         {
             categoriesListView.ItemsSource = CategoryToFileTypeMappings.CategoryAndFileTypesList;
+            fileTypeListView.ItemsSource = CategoryToFileTypeMappings.CategoryAndFileTypesList;
         }
 
-        private void PopulateFileTypeListView()
+        /// <summary>
+        /// Runs after page initialization and is fully loaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnPageLoaded(object sender, RoutedEventArgs e)
         {
-            ListView listView = fileTypeListView;
-            List<CategoryAndFileTypesItem> fileTypeList = new List<CategoryAndFileTypesItem>();
-
-            CategoryAndFileTypesItem? fileTypeListItem = null;
-            string fileTypesFormatted = "";
-
-            foreach (KeyValuePair<string, List<string>> categoryFileTypeMap in CategoryToFileTypeMappings.Map)
-            {
-                // Populate the first file type without the "," separator
-                fileTypesFormatted += categoryFileTypeMap.Value[0];
-
-                // Iterate through remaining file types separating each with ","
-                for (int i = 1; i < categoryFileTypeMap.Value.Count; i++)
-                {
-                    fileTypesFormatted += ", " + categoryFileTypeMap.Value[i];
-                }
-
-                // Add a FileTypeList item with matching category and file types to the list
-                fileTypeListItem = new CategoryAndFileTypesItem(categoryFileTypeMap.Key, fileTypesFormatted);
-                fileTypeList.Add(fileTypeListItem);
-
-                // Reset the file types string
-                fileTypesFormatted = "";
-            }
-
-            listView.ItemsSource = fileTypeList;
+            // Get the category toggles and cache
+            _categoryToggleSwitches = XamlHelper.GetAllChildrenInObjectOfType<ToggleSwitch>(categoriesListView);
         }
 
+        /// <summary>
+        /// On click method to go back to the main page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BackButton_OnClick(object sender, RoutedEventArgs e)
         {
             Frame.GoBack();
@@ -107,12 +93,6 @@ namespace FolderOrganizer
             else
             {
                 SettingsManager.Instance.RemoveFileCategory((string)toggleSwitch.Tag);
-                
-                // Check if the select all toggle is on, if so, toggle it off
-                if (selectAllCategoriesToggleSwitch.IsOn)
-                {
-                    selectAllCategoriesToggleSwitch.IsOn = false;
-                }
             }
 
             // DEBUG
@@ -134,51 +114,60 @@ namespace FolderOrganizer
         {
             ToggleSwitch selectAllToggleSwitch = (ToggleSwitch)sender;
 
-            // Get all the children toggle switches in the categories list view
-            List<ToggleSwitch> categoryToggleSwitches = XamlHelper.GetAllChildrenInObject<ToggleSwitch>(categoriesListView);
-            
             // Iterate through category toggles and match the toggle state to select all toggle
-            if (selectAllToggleSwitch.IsOn)
+            foreach (ToggleSwitch categoryToggle in _categoryToggleSwitches)
             {
-                foreach (ToggleSwitch categoryToggle in categoryToggleSwitches)
-                {
-                    categoryToggle.IsOn = selectAllToggleSwitch.IsOn;
-                }
+                categoryToggle.IsOn = selectAllToggleSwitch.IsOn;
             }
-            
         }
 
+        /// <summary>
+        /// Toggle event for the allow file type editing toggle.
+        /// Sets the associated textbox to enabled to allow editing
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void AllowFileTypeEditing_OnToggle(object sender, RoutedEventArgs e)
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
-            TextBox textBox = new TextBox();
-            StackPanel parentPanel = new StackPanel();
 
-            try
+            // If toggled on, also set the associated category toggle on
+            if (toggleSwitch.IsOn)
             {
-                parentPanel = (StackPanel)toggleSwitch.Parent;
+                foreach (ToggleSwitch categoryToggleSwitch in _categoryToggleSwitches)
+                {
+                    if (toggleSwitch.Tag == categoryToggleSwitch.Tag)
+                    {
+                        categoryToggleSwitch.IsOn = true;
+                    }
+                }
             }
-            catch
+
+            
+
+            // Get the associated text box of the panel 
+            TextBox? textBox = XamlHelper.GetFirstSiblingInPanelOfType<TextBox>(toggleSwitch);
+
+            if (textBox == null)
             {
                 return;
             }
 
-            foreach (object childObject in parentPanel.Children)
-            {
-                if (childObject is TextBox)
-                {
-                    textBox = (TextBox)childObject;
-                }
-            }
-
+            // Toggle the enabled status of the text box
             textBox.IsEnabled = toggleSwitch.IsOn;
         }
 
       
-
+        /// <summary>
+        /// Sets the associated file types of a category in settings based on user textbox input
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ApplyCustomFileTypes_OnClick(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
+
+            // Get the associated text box of the panel
             TextBox? textBox = XamlHelper.GetFirstSiblingInPanelOfType<TextBox>(button);
 
             if (textBox == null)
@@ -186,20 +175,32 @@ namespace FolderOrganizer
                 return;
             }
 
+            // The associated category is stored in the xaml tag of the textbox
             string category = (string)textBox.Tag;
+
+            // Create a new list to hold the new custom file types
             List<string> customFileTypes = new List<string>();
+            
+            // Set iteration variables
             string? customFileType = null;
             bool inValidSequence = false;
             
+            // Iterate through the user input one character at a time
+            // - If (.) we know that we are at the start of a file type
+            // - If (,) we know that we are at the end of a file type
+            // - White space is ignored
             for (int i = 0; i < textBox.Text.Length; i++)
             {
                 if (textBox.Text[i] == '.')
                 {
+                    // In valid sequence, begin adding characters
                     inValidSequence = true;
                     customFileType += textBox.Text[i];
                 }
                 else if (textBox.Text[i] == ',')
                 {
+                    // End of valid sequence
+                    // Add file type to list and clear variables
                     if (customFileType != null)
                     {
                         customFileTypes.Add(customFileType);
@@ -209,10 +210,12 @@ namespace FolderOrganizer
                 }
                 else if (textBox.Text[i] == ' ')
                 {
+                    // Ignore white space
                     continue;
                 }
                 else
                 {
+                    // Add characters to file type if following (.)
                     if (inValidSequence)
                     {
                         customFileType += textBox.Text[i];
@@ -229,29 +232,17 @@ namespace FolderOrganizer
                     
                 }
             }
-            SettingsManager.Instance.Settings.CategoryToFileTypeMap[category] = customFileTypes;
 
-            Debug.WriteLine($"Custom File Type Added In Catefory {SettingsManager.Instance.Settings.CategoryToFileTypeMap.ContainsKey(category)}");
-            Debug.WriteLine($"Number of Extensions: {SettingsManager.Instance.Settings.CategoryToFileTypeMap[category].Count}");
-            foreach (string s in SettingsManager.Instance.Settings.CategoryToFileTypeMap[category])
-            {
-                Debug.WriteLine(s);
-            }
+            // Update the category's associated file types in settings
+            SettingsManager.Instance.AddCustomFileTypesToCategory(category, customFileTypes);
+
+            // DEBUG
+            Debug.WriteLine("CUSTOM FILE TYPES ADDED");
+            Debug.WriteLine($"Category: {SettingsManager.Instance.GetSelectedCategoryAndFileTypes(category).Category}");
+            Debug.WriteLine($"Customs File Types: {SettingsManager.Instance.GetSelectedCategoryAndFileTypes(category).FileTypesFormatted}");
+            
 
         }
     }
-
-
 }
 
-internal class CategoryAndFileTypesItem
-{
-    public string Category { get; private set; }
-    public string AssociatedFileTypes { get; private set; }
-
-    public CategoryAndFileTypesItem(string category, string associatedFileTypes)
-    {
-        Category = category;
-        AssociatedFileTypes = associatedFileTypes;
-    }
-}

@@ -20,7 +20,7 @@ namespace FolderOrganizer
         // Check with double locking
         public static SettingsManager Instance
         {
-            get 
+            get
             {
                 // All threads will get here
                 if (_instance == null)
@@ -68,12 +68,12 @@ namespace FolderOrganizer
             }
 
             // Retrieve the category and file type from the common mappings
-            CategoryAndFileTypes? categoryAndFileTypes = CategoryToFileTypeMappings.GetCategoryAndFileTypes(categoryName);
-            
+            CategoryAndFileTypes? caft = CategoryToFileTypeMappings.GetCategoryAndFileTypes(categoryName);
+
             // Add category if found
-            if (categoryAndFileTypes != null)
+            if (caft != null)
             {
-                Settings.SelectedCategoryFileTypesList.Add(categoryAndFileTypes);   
+                Settings.SelectedCategoryFileTypesList.Add(caft);
             }
         }
 
@@ -97,6 +97,23 @@ namespace FolderOrganizer
             }
         }
 
+        /// <summary>
+        /// Gets a category and file types from settings if it exists
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <returns></returns>
+        internal CategoryAndFileTypes? GetSelectedCategoryAndFileTypes(string categoryName)
+        {
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
+            {
+                if (caft.Category == categoryName)
+                {
+                    return caft;
+                }
+            }
+            return null;
+        }
+
 
         /// <summary>
         /// Determines if a category is already present in setting's category list
@@ -105,9 +122,9 @@ namespace FolderOrganizer
         /// <returns></returns>
         internal bool IsCategoryInSettings(string category)
         {
-            foreach (CategoryAndFileTypes categoryAndFileTypes in Settings.SelectedCategoryFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
             {
-                if (categoryAndFileTypes.Category == category)
+                if (caft.Category == category)
                 {
                     return true;
                 }
@@ -116,11 +133,37 @@ namespace FolderOrganizer
             return false;
         }
 
+
+        /// <summary>
+        /// Adds custom file types to a category if present in settings
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <param name="customFileTypesList"></param>
+        internal void AddCustomFileTypesToCategory(string categoryName, List<string> customFileTypesList)
+        {
+            if (customFileTypesList.Count == 0 || customFileTypesList == null)
+            {
+                return;
+            }
+
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
+            {
+                if (caft.Category == categoryName)
+                {
+                    caft.FileTypesList = customFileTypesList;
+                }
+            }
+        }
+
+        
+
     }
 
     internal class OrganizationSettings
     {
+        //DEPRECIATED: USE SELECTEDCATEGORYFILETYPESLIST INSTEAD
         public Dictionary<string, List<string>> CategoryToFileTypeMap { get; private set; } = new Dictionary<string, List<string>>();
+        
         public List<CategoryAndFileTypes> SelectedCategoryFileTypesList { get; private set; } = new List<CategoryAndFileTypes>();
         public bool UnpackSubfolders = false;
 

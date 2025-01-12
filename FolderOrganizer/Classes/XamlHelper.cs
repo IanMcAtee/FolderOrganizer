@@ -26,7 +26,7 @@ namespace FolderOrganizer
         }
 
 
-        public static List<T> GetAllChildrenInObject<T>(DependencyObject root)
+        public static List<T> GetAllChildrenInObjectOfType<T>(DependencyObject root)
         {
             List<T> childrenOfType = new List<T>();
 
@@ -41,7 +41,7 @@ namespace FolderOrganizer
                     childrenOfType.Add(typedChild);
                 }
 
-                childrenOfType.AddRange(GetAllChildrenInObject<T>(child));
+                childrenOfType.AddRange(GetAllChildrenInObjectOfType<T>(child));
             }
 
             return childrenOfType;

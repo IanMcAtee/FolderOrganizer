@@ -7,7 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="#242424">
+    Background="#242424"
+    Loaded="OnPageLoaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -35,6 +36,7 @@
                 FontWeight="Bold"/>
         </StackPanel>
 
+        <!-- MAIN HEADING -->
         <StackPanel
             Grid.Row="0"
             Grid.Column="0"
@@ -48,6 +50,7 @@
             </Button>
         </StackPanel>
 
+        <!-- FILE CATEGORIES PANE (GRID COLUMN 0) -->
         <StackPanel
             Grid.Row="1"
             Grid.Column="0"
@@ -63,7 +66,7 @@
                 Margin="0,0,0,12"/>
             <ToggleSwitch
                 x:Name="selectAllCategoriesToggleSwitch"
-                OnContent="Select All"
+                OnContent="Remove All"
                 OffContent="Select All"
                 FontWeight="Bold"
                 Toggled="SelectAllCategories_OnToggle"/>
@@ -92,6 +95,7 @@
             </ListView>
         </StackPanel>
 
+        <!-- FILE TYPE ASSOCIATIONS PANE (GRID COLUMN 1) -->
         <StackPanel
             Grid.Row="1"
             Grid.Column="1"
@@ -113,15 +117,19 @@
 
             <ListView
                 x:Name="fileTypeListView"
+                ItemsSource="{Binding CategoryAndFileTypes}"
                 BorderThickness="1"
-                BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                BorderBrush="Gray"
                 Width="350"
                 Height="600"
                 HorizontalAlignment="Left"
                 SelectionMode="None">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="0,12,0,0">
+                        <StackPanel 
+                            Orientation="Vertical" 
+                            Margin="0,12,0,0"
+                            Tag="{Binding Category}">
                             <TextBlock
                                 Text="{Binding Category}"
                                 FontSize="24"
@@ -129,14 +137,15 @@
                             <ToggleSwitch
                                 OnContent="Use Custom File Types"
                                 OffContent="Use Custom File Types"
-                                Toggled="AllowFileTypeEditing_OnToggle"/>
+                                Toggled="AllowFileTypeEditing_OnToggle"
+                                Tag="{Binding Category}"/>
                             <TextBlock
                                 Text="Associated File Types:"
                                 FontSize="14"
                                 FontWeight="Bold"
                                 Margin="0,0,0,8"/>
                             <TextBox
-                                Text="{Binding AssociatedFileTypes}"
+                                Text="{Binding FileTypesFormatted}"
                                 Tag="{Binding Category}"
                                 TextWrapping="Wrap"
                                 AcceptsReturn="False"
@@ -160,6 +169,7 @@
             </ListView>
         </StackPanel>
 
+        <!-- NEW CATEGORY AND FOLDER OPTIONS PANE (GRID COLUMN 2) -->
         <StackPanel
             Grid.Row="1"
             Grid.Column="2"
@@ -222,71 +232,4 @@
             </StackPanel>
         </StackPanel>
     </Grid>
-    
-    <!--<Grid>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock
-                Text="File Type Associations"
-                FontSize="32"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                Margin="0,0,0,12"/>
-            <TextBlock
-                Text="To customize the file types associated with a category:"
-                Width="300"
-                HorizontalAlignment="Left"
-                TextWrapping="Wrap"
-                Margin="0,0,0,12"/>
-            
-            <ListView
-                x:Name="fileTypeListView"
-                BorderThickness="1"
-                BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
-                Width="350"
-                Height="600"
-                HorizontalAlignment="Left"
-                SelectionMode="None">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="0,12,0,0">
-                            <TextBlock
-                                Text="{Binding Category}"
-                                FontSize="24"
-                                FontWeight="Bold"/>
-                            <ToggleSwitch
-                                OnContent="Use Custom File Types"
-                                OffContent="Use Custom File Types"
-                                Toggled="AllowFileTypeEditing_OnToggle"/>
-                            <TextBlock
-                                Text="Associated File Types:"
-                                FontSize="14"
-                                FontWeight="Bold"
-                                Margin="0,0,0,8"/>
-                            <TextBox
-                                Text="{Binding AssociatedFileTypes}"
-                                Tag="{Binding Category}"
-                                TextWrapping="Wrap"
-                                AcceptsReturn="False"
-                                IsSpellCheckEnabled="False"
-                                IsEnabled="False"
-                                Margin="0,0,0,8"/>
-                            <Button
-                                Content="Apply"
-                                HorizontalAlignment="Right"
-                                Background="SteelBlue"
-                                Click="ApplyCustomFileTypes_OnClick"
-                                Visibility="Visible"/>
-                            <Line 
-                                X1="0" X2="300"
-                                StrokeThickness="2"
-                                Stroke="White"
-                                Margin="0,12,0,0"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            
-
-        </StackPanel>
-    </Grid>-->
 </Page>
