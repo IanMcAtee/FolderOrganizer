@@ -127,18 +127,19 @@
                         <StackPanel 
                             Orientation="Vertical" 
                             Margin="0,12,0,0"
-                            Tag="{Binding Category}"
-                            Loaded="FileTypesListViewItem_OnLoaded">
+                            Tag="{Binding Category}">
                             <TextBlock
+                                Tag="{Binding Category}"
                                 Text="{Binding Category}"
                                 FontSize="24"
                                 FontWeight="Bold"
-                                Loaded="FileTypesCategoryHeader_OnLoaded"/>
+                                Loaded="FileTypesListViewItem_OnLoaded"/>
                             <ToggleSwitch
                                 OnContent="Use Custom File Types"
                                 OffContent="Use Custom File Types"
                                 Toggled="AllowFileTypeEditing_OnToggle"
-                                Tag="{Binding Category}"/>
+                                Tag="{Binding Category}"
+                                Loaded="FileTypesListViewItem_OnLoaded"/>
                             <TextBlock
                                 Text="Associated File Types:"
                                 FontSize="14"
@@ -152,13 +153,16 @@
                                 IsSpellCheckEnabled="False"
                                 IsEnabled="False"
                                 IsEnabledChanged="CustomFileTextBox_OnEnableChanged"
+                                Loaded="FileTypesListViewItem_OnLoaded"
                                 Margin="0,0,0,8"/>
                             <Button
                                 Content="Apply"
                                 HorizontalAlignment="Right"
                                 Background="SteelBlue"
                                 Click="ApplyCustomFileTypes_OnClick"
-                                Visibility="Collapsed"/>
+                                Visibility="Collapsed"
+                                Tag="{Binding Category}"
+                                Loaded="FileTypesListViewItem_OnLoaded"/>
                             <Line 
                                 X1="0" X2="300"
                                 StrokeThickness="2"

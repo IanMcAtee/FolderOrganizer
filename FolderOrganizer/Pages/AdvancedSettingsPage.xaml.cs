@@ -27,8 +27,12 @@ namespace FolderOrganizer
     {
         // List of all the category toggles in category pane
         private List<ToggleSwitch> _categoryToggleSwitches = new List<ToggleSwitch>();
-        // List of all the category headers in the file type association pane
+        
+        // Lists of all elements in a list view item in the file types pane
         private List<TextBlock> _fileTypesHeaderTextBlocks = new List<TextBlock>();
+        private List<ToggleSwitch> _allowCustomFileTypesToggleSwitches = new List<ToggleSwitch>();
+        private List<TextBox> _customFileTypesTextBoxes = new List<TextBox>();
+        private List<Button> _applyCustomFileTypesButtons = new List<Button>();
 
         private readonly Color _steelBlueColor = Color.FromArgb(255, 70, 130, 180);
         private readonly Color _whiteColor = Color.FromArgb(255, 255, 255, 255);
@@ -65,30 +69,32 @@ namespace FolderOrganizer
         }
 
         /// <summary>
-        /// On Load event for the header text block of the file type associations pane
-        /// Caches the header text block in the _fileTypesHeaderTextBlocks list
+        /// On Load event for the xaml controls in the file types list view item.
+        /// Caches the control in member variable list for 
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void FileTypesCategoryHeader_OnLoaded(object sender, RoutedEventArgs e)
-        {
-            TextBlock headerTextBlock = (TextBlock)sender;
-            _fileTypesHeaderTextBlocks.Add(headerTextBlock);
-        }
-
         private void FileTypesListViewItem_OnLoaded(object sender, RoutedEventArgs e)
         {
             switch (sender)
             {
                 case TextBlock textBlock:
-                    Debug.WriteLine("Found text block");
+                    _fileTypesHeaderTextBlocks.Add(textBlock);
                     break;
-
+                case ToggleSwitch toggleSwitch:
+                    _allowCustomFileTypesToggleSwitches.Add(toggleSwitch);
+                    break;
+                case TextBox textBox:
+                    _customFileTypesTextBoxes.Add(textBox);
+                    break;
+                case Button button:
+                    _applyCustomFileTypesButtons.Add(button);
+                    break;
+                default:
+                    return;
+                    
             }
-            
         }
-
-        
 
 
         /// <summary>
@@ -112,26 +118,31 @@ namespace FolderOrganizer
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
 
+            // Find the associated Header in the file type associations list
+            TextBlock headerTextBlock = new TextBlock();
+            foreach (TextBlock textBlock in _fileTypesHeaderTextBlocks)
+            {
+                if (toggleSwitch.Tag == textBlock.Tag)
+                {
+                    headerTextBlock = textBlock;
+                }
+            }
+
             // Add or remove category in settings based on toggle state and set color
             if (toggleSwitch.IsOn)
             {
                 SettingsManager.Instance.AddCommonFileCategory((string)toggleSwitch.Tag);
                 toggleSwitch.Foreground = new SolidColorBrush(_steelBlueColor);
+                headerTextBlock.Foreground = new SolidColorBrush(_steelBlueColor);
             }
             else
             {
                 SettingsManager.Instance.RemoveFileCategory((string)toggleSwitch.Tag);
                 toggleSwitch.Foreground = new SolidColorBrush(_whiteColor);
+                headerTextBlock.Foreground = new SolidColorBrush(_whiteColor);
             }
 
-            // Change the color of the associated header in the File Type Association list to reflect it is active
-            foreach (TextBlock headerTextBlock in _fileTypesHeaderTextBlocks)
-            {
-                if ((string)toggleSwitch.Tag == headerTextBlock.Text)
-                {
-                    headerTextBlock.Foreground = new SolidColorBrush(_steelBlueColor);
-                }
-            }
+            
 
             // DEBUG
             Debug.WriteLine("CATEGORY TOGGLE TOGGLED");
@@ -157,6 +168,7 @@ namespace FolderOrganizer
             {
                 categoryToggle.IsOn = selectAllToggleSwitch.IsOn;
             }
+
         }
 
         /// <summary>
@@ -168,18 +180,6 @@ namespace FolderOrganizer
         private void AllowFileTypeEditing_OnToggle(object sender, RoutedEventArgs e)
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)sender;
-
-            // If toggled on, also set the associated category toggle on
-            if (toggleSwitch.IsOn)
-            {
-                foreach (ToggleSwitch categoryToggleSwitch in _categoryToggleSwitches)
-                {
-                    if (toggleSwitch.Tag == categoryToggleSwitch.Tag)
-                    {
-                        categoryToggleSwitch.IsOn = true;
-                    }
-                }
-            }
 
             // Get the associated text box of the panel 
             TextBox? textBox = XamlHelper.GetFirstSiblingOfType<TextBox>(toggleSwitch);
@@ -258,6 +258,8 @@ namespace FolderOrganizer
 
         }
 
+        // HELPER FUNCTIONS
+
         private List<string> ParseCustomFileTypes(string formattedFileTypesString)
         {
             // The output list of parsed file types
@@ -319,6 +321,6 @@ namespace FolderOrganizer
         }
     }
 
-    
+   
 }
 
