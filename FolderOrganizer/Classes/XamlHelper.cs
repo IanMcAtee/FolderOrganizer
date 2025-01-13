@@ -7,26 +7,26 @@ namespace FolderOrganizer
 {
     internal static class XamlHelper
     {
-        public static T? GetFirstSiblingInPanelOfType<T>(Control xamlControl)
+        public static T? GetFirstSiblingOfType<T>(DependencyObject childObject)
         {
-            try
-            {
-                Panel parentPanel = (Panel)xamlControl.Parent;
+            DependencyObject parent = VisualTreeHelper.GetParent(childObject);
 
-                foreach(object child in parentPanel.Children)
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+
+            for (int i = 0; i < childCount; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
                 {
-                    if (child.GetType() == typeof(T))
-                    {
-                        return (T)child;
-                    }
+                    return typedChild;
                 }
-                return default;
             }
-            catch { return default;}
+
+            return default;
         }
 
 
-        public static List<T> GetAllChildrenInObjectOfType<T>(DependencyObject root)
+        public static List<T> GetAllChildrenOfType<T>(DependencyObject root)
         {
             List<T> childrenOfType = new List<T>();
 
@@ -34,14 +34,14 @@ namespace FolderOrganizer
 
             for (int i = 0; i < childCount; i++)
             {
-                var child = VisualTreeHelper.GetChild(root, i);
+                DependencyObject child = VisualTreeHelper.GetChild(root, i);
 
                 if (child is T typedChild)
                 {
                     childrenOfType.Add(typedChild);
                 }
 
-                childrenOfType.AddRange(GetAllChildrenInObjectOfType<T>(child));
+                childrenOfType.AddRange(GetAllChildrenOfType<T>(child));
             }
 
             return childrenOfType;

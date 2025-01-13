@@ -7,8 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="#242424"
-    Loaded="OnPageLoaded">
+    Background="#242424">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -117,7 +116,6 @@
 
             <ListView
                 x:Name="fileTypeListView"
-                ItemsSource="{Binding CategoryAndFileTypes}"
                 BorderThickness="1"
                 BorderBrush="Gray"
                 Width="350"
@@ -129,11 +127,13 @@
                         <StackPanel 
                             Orientation="Vertical" 
                             Margin="0,12,0,0"
-                            Tag="{Binding Category}">
+                            Tag="{Binding Category}"
+                            Loaded="FileTypesListViewItem_OnLoaded">
                             <TextBlock
                                 Text="{Binding Category}"
                                 FontSize="24"
-                                FontWeight="Bold"/>
+                                FontWeight="Bold"
+                                Loaded="FileTypesCategoryHeader_OnLoaded"/>
                             <ToggleSwitch
                                 OnContent="Use Custom File Types"
                                 OffContent="Use Custom File Types"
@@ -151,13 +151,14 @@
                                 AcceptsReturn="False"
                                 IsSpellCheckEnabled="False"
                                 IsEnabled="False"
+                                IsEnabledChanged="CustomFileTextBox_OnEnableChanged"
                                 Margin="0,0,0,8"/>
                             <Button
                                 Content="Apply"
                                 HorizontalAlignment="Right"
                                 Background="SteelBlue"
                                 Click="ApplyCustomFileTypes_OnClick"
-                                Visibility="Visible"/>
+                                Visibility="Collapsed"/>
                             <Line 
                                 X1="0" X2="300"
                                 StrokeThickness="2"
