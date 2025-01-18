@@ -36,6 +36,9 @@ namespace FolderOrganizer
 
         private readonly Color _steelBlueColor = Color.FromArgb(255, 70, 130, 180);
         private readonly Color _whiteColor = Color.FromArgb(255, 255, 255, 255);
+        private readonly Color _greenColor = Color.FromArgb(255, 0, 255, 0);
+        private static readonly SolidColorBrush RedBrush = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
+        private static readonly SolidColorBrush GreenBrush = new SolidColorBrush(Color.FromArgb(255, 0, 255, 0));
 
         public AdvancedSettingsPage()
         {
@@ -51,8 +54,8 @@ namespace FolderOrganizer
         /// </summary>
         private void PopulateListViews()
         {
-            categoriesListView.ItemsSource = CategoryToFileTypeMappings.CategoryAndFileTypesList;
-            fileTypeListView.ItemsSource = CategoryToFileTypeMappings.CategoryAndFileTypesList;
+            categoriesListView.ItemsSource = CommonCategoryToFileTypeMappings.CategoryAndFileTypesList;
+            fileTypeListView.ItemsSource = CommonCategoryToFileTypeMappings.CategoryAndFileTypesList;
             
         }
 
@@ -228,6 +231,8 @@ namespace FolderOrganizer
         {
             Button button = (Button)sender;
 
+            // Toggle the corresponding category on so that the category is in the selected categories
+
             // Get the associated text box of the panel
             TextBox? textBox = XamlHelper.GetFirstSiblingOfType<TextBox>(button);
 
@@ -244,6 +249,19 @@ namespace FolderOrganizer
             // Update the category's associated file types in settings
             if (customFileTypes.Count != 0)
             {
+                
+                foreach (ToggleSwitch categoryToggleSwitch in _categoryToggleSwitches)
+                {
+                    if ((string)categoryToggleSwitch.Tag == category)
+                    {
+                        if (!categoryToggleSwitch.IsOn)
+                        {
+                            categoryToggleSwitch.IsOn = true;
+                        }
+                        categoryToggleSwitch.Foreground = new SolidColorBrush(_greenColor);
+                    }
+                }
+
                 SettingsManager.Instance.AddCustomFileTypesToCategory(category, customFileTypes);
             }
             
@@ -256,6 +274,27 @@ namespace FolderOrganizer
                 Debug.WriteLine($"Customs File Types: {SettingsManager.Instance.GetSelectedCategoryAndFileTypes(category).FileTypesFormatted}");
             }
 
+        }
+
+        private void AddCustomCategoryAndFileTypes_OnClick(object sender, RoutedEventArgs e)
+        {
+            string customCategoryName = customCategoryNameTextBox.Text;
+            List<string> customFileTypes = ParseCustomFileTypes(customCategoryFileTypesTextBox.Text);
+
+            SettingsResponse addCustomCategoryResponse = SettingsManager.Instance.AddCustomCategoryAndFileTypes(customCategoryName, customFileTypes);
+
+            addCustomCategoryResponseTextBlock.Text = addCustomCategoryResponse.Response;
+            
+            if (addCustomCategoryResponse.Success)
+            {
+                addCustomCategoryResponseTextBlock.Foreground = GreenBrush;
+            }
+            else
+            {
+                addCustomCategoryResponseTextBlock.Foreground = RedBrush;
+            }
+
+            addCustomCategoryResponseTextBlock.Visibility = Visibility.Visible;
         }
 
         // HELPER FUNCTIONS

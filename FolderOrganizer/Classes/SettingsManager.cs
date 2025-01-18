@@ -68,7 +68,7 @@ namespace FolderOrganizer
             }
 
             // Retrieve the category and file type from the common mappings
-            CategoryAndFileTypes? caft = CategoryToFileTypeMappings.GetCategoryAndFileTypes(categoryName);
+            CategoryAndFileTypes? caft = CommonCategoryToFileTypeMappings.GetCategoryAndFileTypes(categoryName);
 
             // Add category if found
             if (caft != null)
@@ -155,7 +155,27 @@ namespace FolderOrganizer
             }
         }
 
-        
+        internal SettingsResponse AddCustomCategoryAndFileTypes(string categoryName, List<string> customFileTypes)
+        {
+            // Check if category already in settings or if it is already a common category
+            if (IsCategoryInSettings(categoryName) || CommonCategoryToFileTypeMappings.IsCategoryInCommonCategories(categoryName))
+            {
+                return new SettingsResponse(false, $" The category, {categoryName}, is already defined");
+            }
+
+            // Check if there are custom file types associated with the category
+            if (customFileTypes.Count == 0)
+            {
+                return new SettingsResponse(false, $"No valid file types provided for the category, {categoryName}");
+            }
+
+            CategoryAndFileTypes customCaft = new CategoryAndFileTypes(categoryName, customFileTypes);
+
+            Settings.SelectedCategoryFileTypesList.Add(customCaft);
+
+            return new SettingsResponse(true, $"The category, {categoryName}, and its filetypes were successfully added");
+            
+        }
 
     }
 
@@ -168,4 +188,20 @@ namespace FolderOrganizer
         public bool UnpackSubfolders = false;
 
     }
+
+    internal class SettingsResponse
+    {
+        public bool Success { get; private set; } = false;
+        public string? Response { get; private set; } = null;
+
+        public SettingsResponse(bool success, string response)
+        {
+            Success = success;
+            Response = response;
+        }
+    }
 }
+
+
+
+

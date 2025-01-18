@@ -8,7 +8,7 @@ using Windows.Media.AppBroadcasting;
 
 namespace FolderOrganizer
 {
-    internal static class CategoryToFileTypeMappings
+    internal static class CommonCategoryToFileTypeMappings
     {
         // Return the map sorted by keys on get
         public static Dictionary<string,List<string>> Map
@@ -364,14 +364,26 @@ namespace FolderOrganizer
 
         public static CategoryAndFileTypes? GetCategoryAndFileTypes(string categoryName)
         {
-            foreach (CategoryAndFileTypes categoryAndFileTypes in CategoryAndFileTypesList)
+            foreach (CategoryAndFileTypes caft in CategoryAndFileTypesList)
             {
-                if (categoryAndFileTypes.Category ==  categoryName)
+                if (caft.Category ==  categoryName)
                 {
-                    return categoryAndFileTypes;
+                    return caft;
                 }
             }
             return null;
+        }
+
+        public static bool IsCategoryInCommonCategories(string categoryName)
+        {
+            foreach (CategoryAndFileTypes caft in CategoryAndFileTypesList)
+            {
+                if (caft.Category == categoryName)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
     }

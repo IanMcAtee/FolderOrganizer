@@ -16,7 +16,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="5*"/>
+            <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
         <Border Grid.Row ="0" Grid.ColumnSpan="3" Background="Black"/>
         <Border Grid.Row ="1" Grid.Column="0" Background="#121212"/>
@@ -73,10 +73,10 @@
                 x:Name="categoriesListView"
                 BorderThickness="1"
                 BorderBrush="Gray"
-                Width="350"
-                Height="600"
+                Width="300"
                 HorizontalAlignment="Left"
-                SelectionMode="None">
+                SelectionMode="Single"
+                Margin="0,0,0,12">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Vertical">
@@ -90,8 +90,38 @@
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-
             </ListView>
+            <TextBlock
+                Text="Custom Categories"
+                FontSize="24"
+                FontWeight="Bold"
+                Margin="0,0,0,12"/>
+            <ListView
+                
+                BorderThickness="1"
+                BorderBrush="Gray"
+                Width="300"
+                Height="300"
+                HorizontalAlignment="Left"
+                SelectionMode="Single"
+                Margin="0,0,0,12">
+                <ListView.ItemTemplate>
+                    
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <ToggleSwitch
+                                OffContent="{Binding Category}"
+                                OnContent="{Binding Category}"
+                                FontWeight="Bold"
+                                Tag="{Binding Category}"
+                                Loaded="CategoryToggleSwitch_OnLoaded"
+                                Toggled="CategoryToggleSwitch_OnToggle"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                
+            </ListView>
+
         </StackPanel>
 
         <!-- FILE TYPE ASSOCIATIONS PANE (GRID COLUMN 1) -->
@@ -196,6 +226,7 @@
                 Padding="12"
                 Margin="0,0,0,12">
                     <TextBox
+                    x:Name="customCategoryNameTextBox"
                     PlaceholderText="Category Name"
                     TextWrapping="Wrap"
                     FontSize="18"
@@ -206,15 +237,23 @@
                     FontWeight="Bold"
                     Margin="0,0,0,8"/>
                     <TextBox
+                    x:Name="customCategoryFileTypesTextBox"
                     PlaceholderText="File types..."
                     TextWrapping="Wrap"
                     AcceptsReturn="False"
                     IsSpellCheckEnabled="False"/>
                 </StackPanel>
+                <TextBlock
+                    x:Name="addCustomCategoryResponseTextBlock"
+                    Text="The category, documents, was added successfully"
+                    TextWrapping="Wrap"
+                    Visibility="Collapsed"
+                    />
                 <Button
-                Content="Add"
-                Background="SteelBlue"
-                HorizontalAlignment="Center"/>
+                    Content="Add"
+                    Background="SteelBlue"
+                    Click="AddCustomCategoryAndFileTypes_OnClick"
+                    HorizontalAlignment="Center"/>
             </StackPanel>
             <StackPanel>
                 <TextBlock
