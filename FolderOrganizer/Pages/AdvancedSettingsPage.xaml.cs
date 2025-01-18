@@ -276,26 +276,31 @@ namespace FolderOrganizer
 
         }
 
-        private void AddCustomCategoryAndFileTypes_OnClick(object sender, RoutedEventArgs e)
+        private async void AddCustomCategoryAndFileTypes_OnClick(object sender, RoutedEventArgs e)
         {
-            string customCategoryName = customCategoryNameTextBox.Text;
-            List<string> customFileTypes = ParseCustomFileTypes(customCategoryFileTypesTextBox.Text);
-
-            SettingsResponse addCustomCategoryResponse = SettingsManager.Instance.AddCustomCategoryAndFileTypes(customCategoryName, customFileTypes);
-
-            addCustomCategoryResponseTextBlock.Text = addCustomCategoryResponse.Response;
-            
-            if (addCustomCategoryResponse.Success)
-            {
-                addCustomCategoryResponseTextBlock.Foreground = GreenBrush;
-            }
-            else
-            {
-                addCustomCategoryResponseTextBlock.Foreground = RedBrush;
-            }
-
-            addCustomCategoryResponseTextBlock.Visibility = Visibility.Visible;
+            await addCustomCategoryContentDialog.ShowAsync();
         }
+
+        //private void AddCustomCategoryAndFileTypes_OnClick(object sender, RoutedEventArgs e)
+        //{
+        //    string customCategoryName = customCategoryNameTextBox.Text;
+        //    List<string> customFileTypes = ParseCustomFileTypes(customCategoryFileTypesTextBox.Text);
+
+        //    SettingsResponse addCustomCategoryResponse = SettingsManager.Instance.AddCustomCategoryAndFileTypes(customCategoryName, customFileTypes);
+
+        //    addCustomCategoryResponseTextBlock.Text = addCustomCategoryResponse.Response;
+
+        //    if (addCustomCategoryResponse.Success)
+        //    {
+        //        addCustomCategoryResponseTextBlock.Foreground = GreenBrush;
+        //    }
+        //    else
+        //    {
+        //        addCustomCategoryResponseTextBlock.Foreground = RedBrush;
+        //    }
+
+        //    addCustomCategoryResponseTextBlock.Visibility = Visibility.Visible;
+        //}
 
         // HELPER FUNCTIONS
 
