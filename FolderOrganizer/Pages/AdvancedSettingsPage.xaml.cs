@@ -17,6 +17,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Windows.UI.Core;
 using System.Threading.Tasks;
 using Windows.Security.Cryptography.Core;
+using System.Collections.ObjectModel;
 
 namespace FolderOrganizer
 {
@@ -27,7 +28,11 @@ namespace FolderOrganizer
     {
         // List of all the category toggles in category pane
         private List<ToggleSwitch> _categoryToggleSwitches = new List<ToggleSwitch>();
-        
+
+        internal ObservableCollection<CategoryAndFileTypes> CategoriesCollection { get; private set; }
+        internal ObservableCollection<CategoryAndFileTypes> FileTypesCollection { get; private set; }
+
+
         // Lists of all elements in a list view item in the file types pane
         private List<TextBlock> _fileTypesHeaderTextBlocks = new List<TextBlock>();
         private List<ToggleSwitch> _allowCustomFileTypesToggleSwitches = new List<ToggleSwitch>();
@@ -43,6 +48,10 @@ namespace FolderOrganizer
         #region Page Initialization
         public AdvancedSettingsPage()
         {
+            DataContext = this;
+            CategoriesCollection = new ObservableCollection<CategoryAndFileTypes>();
+            FileTypesCollection = new ObservableCollection<CategoryAndFileTypes>();
+
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Enabled;
 
@@ -60,8 +69,13 @@ namespace FolderOrganizer
         /// </summary>
         private void PopulateListViews()
         {
-            categoriesListView.ItemsSource = CommonCategoryToFileTypeMappings.CategoryAndFileTypesList;
-            fileTypeListView.ItemsSource = CommonCategoryToFileTypeMappings.CategoryAndFileTypesList;
+            foreach(CategoryAndFileTypes caft in CommonCategoryToFileTypeMappings.CategoryAndFileTypesList)
+            {
+                CategoriesCollection.Add(caft);
+                FileTypesCollection.Add(caft);
+            }
+            categoriesListView.ItemsSource = CategoriesCollection;
+            fileTypeListView.ItemsSource = FileTypesCollection;
             
         }
 
@@ -350,8 +364,15 @@ namespace FolderOrganizer
             // If success, close the content dialog
             else
             {
-                int index = SettingsManager.Instance.Settings.CustomCategoryAndFileTypesList.Count - 1;
-                categoriesListView.Items.Add(new CategoryAndFileTypes("Custom", new List<string> { ".cust"}));
+                // Get the newly added category and files type from the settings 
+                CategoryAndFileTypes? customCaft = SettingsManager.Instance.GetCustomCategoryAndFileTypes(customCategoryName);
+
+                if (customCaft != null)
+                {
+                    CategoriesCollection.Add(customCaft);
+                    FileTypesCollection.Add(customCaft);
+                }
+                
                 addCustomCategoryContentDialog.Hide();
 
                 ///// DEBUG /////

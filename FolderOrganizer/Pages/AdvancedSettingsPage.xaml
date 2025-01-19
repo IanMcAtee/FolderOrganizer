@@ -78,7 +78,8 @@
                 HorizontalAlignment="Left"
                 SelectionMode="None"
                 Margin="0,0,0,12"
-                Padding="0,0,0,0">
+                Padding="0,0,0,0"
+                ItemsSource="{Binding CategoriesCollection}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
