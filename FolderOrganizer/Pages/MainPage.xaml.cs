@@ -124,7 +124,7 @@ namespace FolderOrganizer
             string? category = categoryCheckBox.Tag.ToString();
             if (category != null)
             {
-                SettingsManager.Instance.RemoveFileCategory(category);
+                SettingsManager.Instance.RemoveCategoryFromSelectedCategories(category);
             }
             foreach (string cat in SettingsManager.Instance.Settings.CategoryToFileTypeMap.Keys)
             {

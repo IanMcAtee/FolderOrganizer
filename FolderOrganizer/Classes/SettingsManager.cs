@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +40,12 @@ namespace FolderOrganizer
             }
         }
 
+        // Internal variables exposed to the rest of the namespace
         internal OrganizationSettings Settings = new OrganizationSettings();
+        
+        // Callbacks 
+        internal static event Action? OnCategorySelect = null;
+        internal static event Action? OnCustomCategoryAdded = null;
 
         internal void SetUnpackSubFolders(bool set)
         {
@@ -56,42 +62,48 @@ namespace FolderOrganizer
         }
 
         /// <summary>
-        /// Adds a category from the CategoryToFileTypeMappings to the settings if not present
+        /// Adds a category and its associated file types to the selected category and file types list
         /// </summary>
         /// <param name="categoryName"></param>
-        internal void AddCommonFileCategory(string categoryName)
+        /// <returns></returns>
+        internal void AddCategoryToSelectedCategories(string categoryName)
         {
-            // Check if category already in settings
-            if (IsCategoryInSettings(categoryName))
+            // Check if the category is already selected, if so, return 
+            if (IsCategorySelected(categoryName))
             {
                 return;
             }
 
-            // Retrieve the category and file type from the common mappings
+            // Check if category is a common category, if so, add to selected categories and invoke callback
             CategoryAndFileTypes? caft = CommonCategoryToFileTypeMappings.GetCategoryAndFileTypes(categoryName);
-
-            // Add category if found
             if (caft != null)
             {
-                Settings.SelectedCategoryFileTypesList.Add(caft);
+                Settings.SelectedCategoryAndFileTypesList.Add(caft);
+                OnCategorySelect?.Invoke();
+                return;
+            }
+
+            // Check if category is a custom category, if so, add to selected categories and invoke callback
+            caft = GetCustomCategoryAndFileTypes(categoryName);
+            if (caft != null)
+            {
+                Settings.SelectedCategoryAndFileTypesList.Add(caft);
+                OnCategorySelect?.Invoke();
             }
         }
+
 
         /// <summary>
         /// Removes a category from the settings if present
         /// </summary>
         /// <param name="categoryName"></param>
-        internal void RemoveFileCategory(string categoryName)
+        internal void RemoveCategoryFromSelectedCategories(string categoryName)
         {
-            if (!IsCategoryInSettings(categoryName))
-            {
-                return;
-            }
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
             {
                 if (caft.Category == categoryName)
                 {
-                    Settings.SelectedCategoryFileTypesList.Remove(caft);
+                    Settings.SelectedCategoryAndFileTypesList.Remove(caft);
                     break;
                 }
             }
@@ -104,7 +116,19 @@ namespace FolderOrganizer
         /// <returns></returns>
         internal CategoryAndFileTypes? GetSelectedCategoryAndFileTypes(string categoryName)
         {
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
+            {
+                if (caft.Category == categoryName)
+                {
+                    return caft;
+                }
+            }
+            return null;
+        }
+
+        internal CategoryAndFileTypes? GetCustomCategoryAndFileTypes(string categoryName)
+        {
+            foreach (CategoryAndFileTypes caft in Settings.CustomCategoryAndFileTypesList)
             {
                 if (caft.Category == categoryName)
                 {
@@ -116,15 +140,28 @@ namespace FolderOrganizer
 
 
         /// <summary>
-        /// Determines if a category is already present in setting's category list
+        /// Determines if a category is already present in setting's slected category list
         /// </summary>
-        /// <param name="category"></param>
+        /// <param name="categoryName"></param>
         /// <returns></returns>
-        internal bool IsCategoryInSettings(string category)
+        internal bool IsCategorySelected(string categoryName)
         {
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
             {
-                if (caft.Category == category)
+                if (caft.Category == categoryName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        internal bool IsCustomCategory(string categoryName)
+        {
+            foreach (CategoryAndFileTypes caft in Settings.CustomCategoryAndFileTypesList)
+            {
+                if (caft.Category == categoryName)
                 {
                     return true;
                 }
@@ -146,7 +183,7 @@ namespace FolderOrganizer
                 return;
             }
 
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
             {
                 if (caft.Category == categoryName)
                 {
@@ -155,10 +192,22 @@ namespace FolderOrganizer
             }
         }
 
+        /// <summary>
+        /// Adds a custom file category to the settings manager custom category and file types list
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <param name="customFileTypes"></param>
+        /// <returns></returns>
         internal SettingsResponse AddCustomCategoryAndFileTypes(string categoryName, List<string> customFileTypes)
         {
-            // Check if category already in settings or if it is already a common category
-            if (IsCategoryInSettings(categoryName) || CommonCategoryToFileTypeMappings.IsCategoryInCommonCategories(categoryName))
+            // Check if category name is not empty or null
+            if (categoryName == null || categoryName.Length == 0)
+            {
+                return new SettingsResponse(false, "No category name provided");
+            }
+
+            // Check if category already a custom category or if it is already a common category
+            if (IsCustomCategory(categoryName) || CommonCategoryToFileTypeMappings.IsCategoryInCommonCategories(categoryName))
             {
                 return new SettingsResponse(false, $" The category, {categoryName}, is already defined");
             }
@@ -166,12 +215,38 @@ namespace FolderOrganizer
             // Check if there are custom file types associated with the category
             if (customFileTypes.Count == 0)
             {
-                return new SettingsResponse(false, $"No valid file types provided for the category, {categoryName}");
+                return new SettingsResponse(false, $"No valid file types provided for the {categoryName} category");
             }
 
+            // Check if a file type is already present in another category
+            foreach (string customFileType in customFileTypes)
+            {
+                // Search the common categories
+                foreach (CategoryAndFileTypes caft in CommonCategoryToFileTypeMappings.CategoryAndFileTypesList)
+                {
+                    if (caft.FileTypesList.Contains(customFileType))
+                    {
+                        return new SettingsResponse(false, $"File type, {customFileType}, already defined in {caft.Category} category");
+                    }
+                }
+                // Search the custom category
+                foreach (CategoryAndFileTypes caft in Settings.CustomCategoryAndFileTypesList)
+                {
+                    if (caft.FileTypesList.Contains(customFileType))
+                    {
+                        return new SettingsResponse(false, $"File type, {customFileType}, already defined in {caft.Category} custom category");
+                    }
+                }
+            }
+
+            // Instantiate a new custom category and file type
             CategoryAndFileTypes customCaft = new CategoryAndFileTypes(categoryName, customFileTypes);
 
-            Settings.SelectedCategoryFileTypesList.Add(customCaft);
+            // Add it to the custom categories and file types list
+            Settings.CustomCategoryAndFileTypesList.Add(customCaft);
+
+            // Invoke any callbacks
+            OnCustomCategoryAdded?.Invoke();
 
             return new SettingsResponse(true, $"The category, {categoryName}, and its filetypes were successfully added");
             
@@ -184,7 +259,8 @@ namespace FolderOrganizer
         //DEPRECIATED: USE SELECTEDCATEGORYFILETYPESLIST INSTEAD
         public Dictionary<string, List<string>> CategoryToFileTypeMap { get; private set; } = new Dictionary<string, List<string>>();
         
-        public List<CategoryAndFileTypes> SelectedCategoryFileTypesList { get; private set; } = new List<CategoryAndFileTypes>();
+        public List<CategoryAndFileTypes> SelectedCategoryAndFileTypesList { get; private set; } = new List<CategoryAndFileTypes>();
+        public List<CategoryAndFileTypes> CustomCategoryAndFileTypesList { get; private set; } = new List<CategoryAndFileTypes>();
         public bool UnpackSubfolders = false;
 
     }
@@ -194,7 +270,7 @@ namespace FolderOrganizer
         public bool Success { get; private set; } = false;
         public string? Response { get; private set; } = null;
 
-        public SettingsResponse(bool success, string response)
+        public SettingsResponse(bool success, string response = "")
         {
             Success = success;
             Response = response;

@@ -34,21 +34,27 @@ namespace FolderOrganizer
         private List<TextBox> _customFileTypesTextBoxes = new List<TextBox>();
         private List<Button> _applyCustomFileTypesButtons = new List<Button>();
 
-        private readonly Color _steelBlueColor = Color.FromArgb(255, 70, 130, 180);
-        private readonly Color _whiteColor = Color.FromArgb(255, 255, 255, 255);
-        private readonly Color _greenColor = Color.FromArgb(255, 0, 255, 0);
+        // Brush colors used on the page
+        private static readonly SolidColorBrush SteelBlueBrush = new SolidColorBrush(Color.FromArgb(255, 70, 130, 180));
         private static readonly SolidColorBrush RedBrush = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
         private static readonly SolidColorBrush GreenBrush = new SolidColorBrush(Color.FromArgb(255, 0, 255, 0));
+        private static readonly SolidColorBrush WhiteBrush = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255));
 
+        #region Page Initialization
         public AdvancedSettingsPage()
         {
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Enabled;
 
+            // Register callbacks from the SettingsManager
+            SettingsManager.OnCategorySelect += UpdateUIOnCategorySelect;
+            SettingsManager.OnCustomCategoryAdded += UpdateUIOnCustomCategoryAdd;
+
             // Populate the category and file types list views
             PopulateListViews();
         }
 
+        
         /// <summary>
         /// Initializes the list views on first launch
         /// </summary>
@@ -98,6 +104,7 @@ namespace FolderOrganizer
                     
             }
         }
+        #endregion
 
 
         /// <summary>
@@ -110,7 +117,8 @@ namespace FolderOrganizer
             Frame.GoBack();
         }
 
-        
+        #region Category Toggles Behaviours 
+
         /// <summary>
         /// Toggle event for category toggle switch. 
         /// Adds or removes associated category in settings based on toggle state
@@ -134,26 +142,42 @@ namespace FolderOrganizer
             // Add or remove category in settings based on toggle state and set color
             if (toggleSwitch.IsOn)
             {
-                SettingsManager.Instance.AddCommonFileCategory((string)toggleSwitch.Tag);
-                toggleSwitch.Foreground = new SolidColorBrush(_steelBlueColor);
-                headerTextBlock.Foreground = new SolidColorBrush(_steelBlueColor);
+                SettingsManager.Instance.AddCategoryToSelectedCategories((string)toggleSwitch.Tag);
+                toggleSwitch.Foreground = SteelBlueBrush;
+                headerTextBlock.Foreground = SteelBlueBrush;
+
+                ///// DEBUG /////
+                Debug.WriteLine("CATEGORY ADDED TO SELECTED CATEGORIES");
+                Debug.WriteLine($"Category Added: {(string)toggleSwitch.Tag}");
+                Debug.WriteLine("Categories in Settings:");
+                foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCategoryAndFileTypesList)
+                {
+                    Debug.WriteLine(c.Category);
+                }
+                Debug.WriteLine("--------------------");
+                /////////////////
             }
             else
             {
-                SettingsManager.Instance.RemoveFileCategory((string)toggleSwitch.Tag);
-                toggleSwitch.Foreground = new SolidColorBrush(_whiteColor);
-                headerTextBlock.Foreground = new SolidColorBrush(_whiteColor);
+                SettingsManager.Instance.RemoveCategoryFromSelectedCategories((string)toggleSwitch.Tag);
+                toggleSwitch.Foreground = WhiteBrush;
+                headerTextBlock.Foreground = WhiteBrush;
+                
+                ///// DEBUG /////
+                Debug.WriteLine("CATEGORY REMOVED FROM SELECTED CATEGORIES");
+                Debug.WriteLine($"Category Removed: {(string)toggleSwitch.Tag}");
+                Debug.WriteLine("Categories in Settings:");
+                foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCategoryAndFileTypesList)
+                {
+                    Debug.WriteLine(c.Category);
+                }
+                Debug.WriteLine("--------------------");
+                /////////////////
             }
 
-            
 
-            // DEBUG
-            Debug.WriteLine("CATEGORY TOGGLE TOGGLED");
-            Debug.WriteLine("Categories in Settings:");
-            foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCategoryFileTypesList)
-            {
-                Debug.WriteLine(c.Category);
-            }
+
+
         }
 
         /// <summary>
@@ -173,6 +197,10 @@ namespace FolderOrganizer
             }
 
         }
+
+        #endregion
+
+        #region Associated File Types Behaviours
 
         /// <summary>
         /// Toggle event for the allow file type editing toggle.
@@ -258,7 +286,7 @@ namespace FolderOrganizer
                         {
                             categoryToggleSwitch.IsOn = true;
                         }
-                        categoryToggleSwitch.Foreground = new SolidColorBrush(_greenColor);
+                        categoryToggleSwitch.Foreground = GreenBrush;
                     }
                 }
 
@@ -276,33 +304,101 @@ namespace FolderOrganizer
 
         }
 
+        #endregion
+
+        #region Add Custom Category Behaviours
+
+        /// <summary>
+        /// On Click event to open the content dialog to add a custom file category
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void AddCustomCategoryAndFileTypes_OnClick(object sender, RoutedEventArgs e)
         {
+            // Clear any previous input
+            customCategoryNameTextBox.Text = "";
+            customCategoryFileTypesTextBox.Text = "";
+            customCategoryMessageTextBox.Text = "";
+            customCategoryMessageTextBox.Visibility = Visibility.Collapsed;
+
+            // Open the dialog
             await addCustomCategoryContentDialog.ShowAsync();
         }
 
-        //private void AddCustomCategoryAndFileTypes_OnClick(object sender, RoutedEventArgs e)
-        //{
-        //    string customCategoryName = customCategoryNameTextBox.Text;
-        //    List<string> customFileTypes = ParseCustomFileTypes(customCategoryFileTypesTextBox.Text);
+        /// <summary>
+        /// On click event to save a custom category and file types from the content dialog
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SaveCustomCategoryAndFileTypes_OnClick(object sender, RoutedEventArgs e)
+        {
+            // Get the name of the custom category
+            string customCategoryName = customCategoryNameTextBox.Text;
+            
+            // Get the custom file types by parsing the formatted string
+            List<string> customFileTypes = ParseCustomFileTypes(customCategoryFileTypesTextBox.Text);
 
-        //    SettingsResponse addCustomCategoryResponse = SettingsManager.Instance.AddCustomCategoryAndFileTypes(customCategoryName, customFileTypes);
+            // Try to add the new category and file types to the settings
+            SettingsResponse addCustomCategoryResponse = SettingsManager.Instance.AddCustomCategoryAndFileTypes(customCategoryName, customFileTypes);
 
-        //    addCustomCategoryResponseTextBlock.Text = addCustomCategoryResponse.Response;
+            // If error, set the error message of the content dialog to visible and set the text to the message
+            if (addCustomCategoryResponse.Success == false)
+            {
+                customCategoryMessageTextBox.Text = addCustomCategoryResponse.Response;
+                customCategoryMessageTextBox.Visibility = Visibility.Visible;
+            }
+            // If success, close the content dialog
+            else
+            {
+                int index = SettingsManager.Instance.Settings.CustomCategoryAndFileTypesList.Count - 1;
+                categoriesListView.Items.Add(new CategoryAndFileTypes("Custom", new List<string> { ".cust"}));
+                addCustomCategoryContentDialog.Hide();
 
-        //    if (addCustomCategoryResponse.Success)
-        //    {
-        //        addCustomCategoryResponseTextBlock.Foreground = GreenBrush;
-        //    }
-        //    else
-        //    {
-        //        addCustomCategoryResponseTextBlock.Foreground = RedBrush;
-        //    }
+                ///// DEBUG /////
+                Debug.WriteLine("CUSTOM CATEGORY ADDED");
+                Debug.WriteLine($"Category: {SettingsManager.Instance.Settings.CustomCategoryAndFileTypesList[SettingsManager.Instance.Settings.CustomCategoryAndFileTypesList.Count - 1].Category}");
+                Debug.WriteLine("File Types:");
+                foreach (string fileType in SettingsManager.Instance.Settings.CustomCategoryAndFileTypesList[SettingsManager.Instance.Settings.CustomCategoryAndFileTypesList.Count - 1].FileTypesList)
+                {
+                    Debug.WriteLine($"{fileType}");
+                }
+                Debug.WriteLine("--------------------");
+                ///////////////
+            }
 
-        //    addCustomCategoryResponseTextBlock.Visibility = Visibility.Visible;
-        //}
 
-        // HELPER FUNCTIONS
+
+        }
+
+        /// <summary>
+        /// On Click event to close the add custom category content dialog
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CloseAddCustomCategoryContentDialog_OnClick(object sender, RoutedEventArgs e)
+        {
+            addCustomCategoryContentDialog.Hide();
+        }
+
+        #endregion
+
+
+
+
+        #region SettingsManager Callbacks
+
+        private void UpdateUIOnCategorySelect()
+        {
+
+        }
+
+        private void UpdateUIOnCustomCategoryAdd()
+        {
+
+        }
+        #endregion
+
+        #region Helper Functions 
 
         private List<string> ParseCustomFileTypes(string formattedFileTypesString)
         {
@@ -363,8 +459,10 @@ namespace FolderOrganizer
 
             return customFileTypes;
         }
+
+        #endregion
     }
 
-   
+
 }
 

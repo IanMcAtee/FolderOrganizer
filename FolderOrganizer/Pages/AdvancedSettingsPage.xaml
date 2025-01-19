@@ -123,14 +123,22 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <StackPanel
-                Margin="0,0,0,0">
-                <StackPanel 
-                    Orientation="Vertical"
-                    HorizontalAlignment="Left"
-                    Width="300"
-                    Padding="12"
-                    Margin="0,0,0,12">
+            
+            <Button
+                Content="Add"
+                Click="AddCustomCategoryAndFileTypes_OnClick"
+                Width="300">
+            </Button>
+
+            <!-- ADD CUSTOM CATEGORY CONTENT DIALOG-->
+            <ContentDialog
+                x:Name="addCustomCategoryContentDialog">
+
+                <StackPanel
+                    Width="400">
+                    <TextBlock
+                        Text="Add Custom File Category"
+                        Style="{StaticResource FolderOrganizerH2Header}"/>
                     <TextBox
                         x:Name="customCategoryNameTextBox"
                         PlaceholderText="Category Name"
@@ -144,45 +152,34 @@
                         Margin="0,0,0,8"/>
                     <TextBox
                         x:Name="customCategoryFileTypesTextBox"
-                        PlaceholderText="File types..."
+                        PlaceholderText="List file types using their dot externsion, separating each by a comma (Example: .doc, .docx, .pdf)"
                         TextWrapping="Wrap"
                         AcceptsReturn="False"
                         IsSpellCheckEnabled="False"/>
-                </StackPanel>
-                <TextBlock
-                    x:Name="addCustomCategoryResponseTextBlock"
-                    Text="The category, documents, was added successfully"
-                    TextWrapping="Wrap"
-                    Visibility="Collapsed"/>
-            </StackPanel>
-            <Button
-                Content="Add"
-                Click="AddCustomCategoryAndFileTypes_OnClick"
-                Width="300">
-            </Button>
-
-            <ContentDialog
-                x:Name="addCustomCategoryContentDialog"
-                CloseButtonText="Close">
-                
-                <StackPanel>
-                    <TextBox
-                        x:Name="customCategoryNameTextBox2"
-                        PlaceholderText="Category Name"
-                        TextWrapping="Wrap"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        Margin="0,0,0,12"/>
                     <TextBlock
-                        Text="Associated File Types:"
-                        FontWeight="Bold"
-                        Margin="0,0,0,8"/>
-                    <TextBox
-                        x:Name="customCategoryFileTypesTextBox2"
-                        PlaceholderText="File types..."
-                        TextWrapping="Wrap"
-                        AcceptsReturn="False"
-                        IsSpellCheckEnabled="False"/>
+                        x:Name="customCategoryMessageTextBox"
+                        Text="Category name already defined"
+                        Foreground="Red"
+                        Margin="0,12,0,0"
+                        Visibility="Collapsed"/>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,24,0,0">
+                        <Button
+                            Content="Save"
+                            Click="SaveCustomCategoryAndFileTypes_OnClick"
+                            Style="{StaticResource FolderOrganizerDefaultButtonStyle}"
+                            Width="180"
+                            Margin="0,0,8,0"/>
+                        <Button
+                            Content="Cancel"
+                            Click="CloseAddCustomCategoryContentDialog_OnClick"
+                            Style="{StaticResource FolderOrganizerRedButtonStyle}"
+                            Width="180"
+                            Margin="8,0,0,0"/>
+
+                    </StackPanel>
                 </StackPanel>
                 
             </ContentDialog>
@@ -277,34 +274,77 @@
             VerticalAlignment="Top"
             Width="300"
             Margin="0,24,0,0">
-            
+             
+            <!-- FOLDER OPTIONS -->
             <StackPanel
-                Padding="0,0,0,12">
+                Margin="0,0,0,12">
                 <TextBlock
-                    Text="Sub-Folder Options"
-                    FontSize="24"
-                    FontWeight="Bold"
-                    Margin="0,0,0,12"/>
-                <ToggleSwitch
-                    OnContent="Move all sub-folders to new folder"
-                    OffContent="Move all sub-folders to new folder"
-                    FontWeight="Bold"/>
-                <ToggleSwitch
-                    OnContent="Organize files within sub-folders"
-                    OffContent="Organize files within sub-folders"
-                    FontWeight="Bold"/>
-                <ToggleSwitch
-                    OnContent="Delete sub-folders after organization"
-                    OffContent="Delete sub-folders after organization"
-                    FontWeight="Bold"/>
+                    Text="Folder Options"
+                    Style="{StaticResource FolderOrganizerH2Header}"/>
+                <!-- DEFAULT FOLDER -->
+                <StackPanel
+                    Margin="0,0,0,12">
+                    <TextBlock
+                    Text="Default Folder"
+                    Style="{StaticResource FolderOrganizerH3Header}"/>
+                    <StackPanel
+                    Orientation="Horizontal">
+                        <Button
+                        Content="Choose"
+                        Margin="0,0,12,0"/>
+                        <TextBlock
+                        Text="Downloads"
+                        VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+                <!-- SUB-FOLDER OPTIONS -->
+                <StackPanel
+                    Margin="0,0,0,12">
+                    <TextBlock
+                        Text="Sub-Folder Options"
+                        Style="{StaticResource FolderOrganizerH3Header}"/>
+                    <ToggleSwitch
+                        OnContent="Move all sub-folders to new folder"
+                        OffContent="Move all sub-folders to new folder"
+                        FontWeight="Bold"/>
+                    <ToggleSwitch
+                        OnContent="Organize files within sub-folders"
+                        OffContent="Organize files within sub-folders"
+                        FontWeight="Bold"/>
+                    <ToggleSwitch
+                        OnContent="Delete sub-folders after organization"
+                        OffContent="Delete sub-folders after organization"
+                        FontWeight="Bold"/>
+                </StackPanel>
+                <!-- SUB-FOLDER EXCEPTIONS -->
+                <StackPanel
+                    Orientation="Vertical"
+                    Margin="0,0,0,12">
+                    <TextBlock
+                        Text="Sub-Folder Exceptions"
+                        Style="{StaticResource FolderOrganizerH3Header}"/>
+                    <ListView
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        Width="300"
+                        Margin="0,0,0,12">
+                        <ListViewItem>
+                            <TextBlock
+                                Text="No Sub-Folder Exceptions"
+                                FontStyle="Italic"/>
+                        </ListViewItem>
+                    </ListView>
+                    <Button
+                        Content="Add"
+                        Width="300"/>
+                </StackPanel>
             </StackPanel>
-
+            
+            <!-- ABOUT -->
             <StackPanel>
                 <TextBlock
                 Text="About"
-                FontSize="24"
-                FontWeight="Bold"
-                Margin="0,0,0,12"/>
+                Style="{StaticResource FolderOrganizerH2Header}"/>
                 <StackPanel
                 Orientation="Horizontal"
                     Margin="0,0,0,8">
@@ -333,10 +373,21 @@
                         FontWeight="Bold"
                         Margin="0,0,8,0"/>
                     <TextBlock
-                        Text="Ian McAtee"/>
+                        Text="Ian McAtee (ianmcatee.com)"/>
                 </StackPanel>
 
             </StackPanel>
+        </StackPanel>
+        
+        <!-- RESET DEFAULTS BUTTON -->
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="2"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom">
+            <Button
+                Content="Reset Defaults"
+                Margin="0,0,12,12"/>
         </StackPanel>
     </Grid>
 </Page>
