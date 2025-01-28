@@ -132,6 +132,9 @@
                 Margin="0,0,0,12"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                     <Button
+                        Content="TEST PAGE"
+                        Click="TestPage_OnClick"/>
+                    <Button
                     Content="Select Folder"
                     Click="FolderSelect_OnClck"
                     Background="#3700B3"

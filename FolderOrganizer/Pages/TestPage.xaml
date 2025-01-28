@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="FolderOrganizer.Pages.TestPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FolderOrganizer.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="9*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row ="0" Grid.ColumnSpan="2" Background="Black"/>
+        <Border Grid.Row ="1" Grid.Column="0" Background="#121212"/>
+        <Border Grid.Row ="1" Grid.Column="1" Background="#242424"/>
+        
+        <!--MAIN HEADING PANEL-->
+        <StackPanel
+            Grid.Row="0"
+            Grid.ColumnSpan="2"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center">
+            <TextBlock
+                Text="Advanced Settings"
+                Style="{StaticResource FolderOrganizerH1Header}"/>
+        </StackPanel>
+        
+        <!--LEFT COLUMN PANEL-->
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalAlignment="Center">
+            <TextBlock
+                Text="Organization Categories"
+                Style="{StaticResource FolderOrganizerH2Header}"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel
+                    Grid.Column="0"
+                    Orientation="Horizontal">
+                    <Button
+                        Content="Select All"/>
+                    <Button
+                        Content="Remove All"/>
+                </StackPanel>
+                <StackPanel
+                    Grid.Column="1"
+                    HorizontalAlignment="Right">
+                    <Button
+                        Content="Expand All"/>
+
+                </StackPanel>
+            </Grid>
+            
+
+            <ListView
+                x:Name="CategoriesListView"
+                SelectionMode="Single"
+                BorderThickness="1"
+                BorderBrush="Gray"
+                Height="600">
+                <ListViewItem>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250"/>
+                            <ColumnDefinition Width="400"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel
+                            Grid.Column="0">
+                            <ToggleSwitch
+                                OnContent="Category"
+                                OffContent="Category"/>
+                        </StackPanel>
+                        <StackPanel
+                            Grid.Column="1">
+                            <StackPanel
+                                Orientation="Vertical">
+
+                                <TextBlock
+                                    Text="Associated File Types:"
+                                    FontWeight="Bold"/>
+                                <TextBox
+                                    PlaceholderText=".pdf, .doc, .docx"/>
+                                <ToggleSwitch
+                                    OnContent="Use Custom File Types"
+                                    OffContent="Use Custom File Types"/>
+
+                            </StackPanel>
+                            <Button
+                                Content="More"
+                                HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </Grid>
+                </ListViewItem>
+            </ListView>
+        </StackPanel>
+
+    </Grid>
+</Page>
