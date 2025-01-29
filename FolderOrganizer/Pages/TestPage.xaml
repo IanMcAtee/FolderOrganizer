@@ -58,53 +58,92 @@
                 </StackPanel>
                 <StackPanel
                     Grid.Column="1"
+                    Orientation="Horizontal"
                     HorizontalAlignment="Right">
                     <Button
                         Content="Expand All"/>
+                    <Button
+                        Content="Collapse All"/>
 
                 </StackPanel>
             </Grid>
             
 
             <ListView
-                x:Name="CategoriesListView"
+                x:Name="defaultCategoriesListView"
                 SelectionMode="Single"
                 BorderThickness="1"
                 BorderBrush="Gray"
                 Height="600">
-                <ListViewItem>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="400"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel
-                            Grid.Column="0">
-                            <ToggleSwitch
-                                OnContent="Category"
-                                OffContent="Category"/>
-                        </StackPanel>
-                        <StackPanel
-                            Grid.Column="1">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:DefaultCategoryViewModel">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="400"/>
+                            </Grid.ColumnDefinitions>
                             <StackPanel
-                                Orientation="Vertical">
+                                Grid.Column="0"
+                                Margin="0,6,0,6">
 
-                                <TextBlock
-                                    Text="Associated File Types:"
-                                    FontWeight="Bold"/>
-                                <TextBox
-                                    PlaceholderText=".pdf, .doc, .docx"/>
                                 <ToggleSwitch
-                                    OnContent="Use Custom File Types"
-                                    OffContent="Use Custom File Types"/>
+                                    OnContent="{x:Bind Caft.Category}"
+                                    OffContent="{x:Bind Caft.Category}"/>
+                            </StackPanel>
+
+                            <!--Collapsible Category Settings Panels -->
+                            <StackPanel
+                                Grid.Column="1">
+                                <StackPanel
+                                    Orientation="Vertical"
+                                    Visibility="Visible">
+
+                                    <TextBlock
+                                        Text="Associated File Types:"
+                                        FontWeight="Bold"
+                                        Margin="0,0,0,12"/>
+                                    <TextBox
+                                        x:Name="fileTypesTextBox"
+                                        PlaceholderText=".pdf, .doc, .docx"
+                                        Margin="0,0,0,12"/>
+                                    <Button
+                                        Content="Apply"
+                                        HorizontalAlignment="Right"
+                                        Style="{StaticResource AccentButtonStyle}"/>
+                                    <ToggleSwitch
+                                        OnContent="Use Custom File Types"
+                                        OffContent="Use Custom File Types"/>
+                                    <Button
+                                        Click="DefaultCategoryCollapse_OnClick"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,0,0,12">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE70E;"/>
+                                        <!--<Image
+                                            Source="/Assets/ArrowUpIcon20dp.png"
+                                            Width="20"/>-->
+                                    </Button>
+                                    <Line
+                                        X1="0" X2="400"
+                                        StrokeThickness="2"
+                                        Stroke="White"/>
+
+                                </StackPanel>
+                                <Button
+                                    Click="{x:Bind Expand_OnClick}"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;"/>
+                                    <!--<Image 
+                                        Source="/Assets/SettingsIcon18dp.png" 
+                                        Width="20"/>-->
+                                </Button>
+
+
 
                             </StackPanel>
-                            <Button
-                                Content="More"
-                                HorizontalAlignment="Right"/>
-                        </StackPanel>
-                    </Grid>
-                </ListViewItem>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
             </ListView>
         </StackPanel>
 
