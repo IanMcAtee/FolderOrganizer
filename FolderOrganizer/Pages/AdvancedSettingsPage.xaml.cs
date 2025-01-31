@@ -164,7 +164,7 @@ namespace FolderOrganizer
                 Debug.WriteLine("CATEGORY ADDED TO SELECTED CATEGORIES");
                 Debug.WriteLine($"Category Added: {(string)toggleSwitch.Tag}");
                 Debug.WriteLine("Categories in Settings:");
-                foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCategoryAndFileTypesList)
+                foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCaftList)
                 {
                     Debug.WriteLine(c.Category);
                 }
@@ -181,7 +181,7 @@ namespace FolderOrganizer
                 Debug.WriteLine("CATEGORY REMOVED FROM SELECTED CATEGORIES");
                 Debug.WriteLine($"Category Removed: {(string)toggleSwitch.Tag}");
                 Debug.WriteLine("Categories in Settings:");
-                foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCategoryAndFileTypesList)
+                foreach (CategoryAndFileTypes c in SettingsManager.Instance.Settings.SelectedCaftList)
                 {
                     Debug.WriteLine(c.Category);
                 }

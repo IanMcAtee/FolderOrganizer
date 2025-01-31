@@ -43,9 +43,73 @@ namespace FolderOrganizer
         // Internal variables exposed to the rest of the namespace
         internal OrganizationSettings Settings = new OrganizationSettings();
         
+        internal void AddToSelectedCategories(CategoryAndFileTypes caft)
+        {
+            if (!IsCategorySelected(caft))
+            {
+                Settings.SelectedCaftList.Add(caft);
+            }
+            
+
+            ///// DEBUG /////
+            Debug.WriteLine("CATEGORY ADDED TO SELECTED CATEGORIES");
+            Debug.WriteLine($"Category Added: {caft.Category}");
+            Debug.WriteLine("Categories selected:");
+            foreach (CategoryAndFileTypes cft in Settings.SelectedCaftList)
+            {
+                Debug.WriteLine($"{cft.Category}");
+            }
+            Debug.WriteLine("------------------------------");
+        }
+
+        private bool IsCategorySelected(CategoryAndFileTypes cftToCheck)
+        {
+            foreach (CategoryAndFileTypes cft in Settings.SelectedCaftList)
+            {
+                if (cft.Category == cftToCheck.Category)
+                {
+                    return true;
+                }
+            }
+            return false;   
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        
+        
+        
         // Callbacks 
         internal static event Action? OnCategorySelect = null;
         internal static event Action? OnCustomCategoryAdded = null;
+
+
 
         internal void SetUnpackSubFolders(bool set)
         {
@@ -78,7 +142,7 @@ namespace FolderOrganizer
             CategoryAndFileTypes? caft = CommonCategoryToFileTypeMappings.GetCategoryAndFileTypes(categoryName);
             if (caft != null)
             {
-                Settings.SelectedCategoryAndFileTypesList.Add(caft);
+                Settings.SelectedCaftList.Add(caft);
                 OnCategorySelect?.Invoke();
                 return;
             }
@@ -87,7 +151,7 @@ namespace FolderOrganizer
             caft = GetCustomCategoryAndFileTypes(categoryName);
             if (caft != null)
             {
-                Settings.SelectedCategoryAndFileTypesList.Add(caft);
+                Settings.SelectedCaftList.Add(caft);
                 OnCategorySelect?.Invoke();
             }
         }
@@ -99,11 +163,11 @@ namespace FolderOrganizer
         /// <param name="categoryName"></param>
         internal void RemoveCategoryFromSelectedCategories(string categoryName)
         {
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCaftList)
             {
                 if (caft.Category == categoryName)
                 {
-                    Settings.SelectedCategoryAndFileTypesList.Remove(caft);
+                    Settings.SelectedCaftList.Remove(caft);
                     break;
                 }
             }
@@ -116,7 +180,7 @@ namespace FolderOrganizer
         /// <returns></returns>
         internal CategoryAndFileTypes? GetSelectedCategoryAndFileTypes(string categoryName)
         {
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCaftList)
             {
                 if (caft.Category == categoryName)
                 {
@@ -146,7 +210,7 @@ namespace FolderOrganizer
         /// <returns></returns>
         internal bool IsCategorySelected(string categoryName)
         {
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCaftList)
             {
                 if (caft.Category == categoryName)
                 {
@@ -183,7 +247,7 @@ namespace FolderOrganizer
                 return;
             }
 
-            foreach (CategoryAndFileTypes caft in Settings.SelectedCategoryAndFileTypesList)
+            foreach (CategoryAndFileTypes caft in Settings.SelectedCaftList)
             {
                 if (caft.Category == categoryName)
                 {
@@ -258,8 +322,9 @@ namespace FolderOrganizer
     {
         //DEPRECIATED: USE SELECTEDCATEGORYFILETYPESLIST INSTEAD
         public Dictionary<string, List<string>> CategoryToFileTypeMap { get; private set; } = new Dictionary<string, List<string>>();
-        
-        public List<CategoryAndFileTypes> SelectedCategoryAndFileTypesList { get; private set; } = new List<CategoryAndFileTypes>();
+
+        public List<CategoryAndFileTypes> DefaultCaftList { get; private set; } = CommonCategoryToFileTypeMappings.CategoryAndFileTypesList;
+        public List<CategoryAndFileTypes> SelectedCaftList { get; private set; } = new List<CategoryAndFileTypes>();
         public List<CategoryAndFileTypes> CustomCategoryAndFileTypesList { get; private set; } = new List<CategoryAndFileTypes>();
         public bool UnpackSubfolders = false;
 
